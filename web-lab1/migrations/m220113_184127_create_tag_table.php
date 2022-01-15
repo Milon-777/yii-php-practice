@@ -3,25 +3,26 @@
 use yii\db\Migration;
 
 /**
- * Handles the creation of table `{{%tag}}`.
+ * Handles the creation of table `tag`.
  */
 class m220113_184127_create_tag_table extends Migration
 {
     /**
      * {@inheritdoc}
      */
-    public function safeUp()
+    public function up()
     {
-        $this->createTable('{{%tag}}', [
+        $this->createTable('tag', [
             'id' => $this->primaryKey(),
+            'title' => $this->string(),
         ]);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function safeDown()
+    public function down()
     {
-        $this->dropTable('{{%tag}}');
+        $this->dropTable('tag');
     }
 }
