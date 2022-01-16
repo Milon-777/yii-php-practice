@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use phpDocumentor\Reflection\Types\Array_;
 use Yii;
 
 /**
@@ -28,6 +29,11 @@ class Category extends \yii\db\ActiveRecord
         return [
             [['title'], 'string', 'max' => 255],
         ];
+    }
+
+    public function getArticles()
+    {
+        return $this->hasMany(Article::class, ['category_id' => 'id']);
     }
 
     /**
