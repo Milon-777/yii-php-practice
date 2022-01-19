@@ -12,6 +12,7 @@ use app\models\LoginForm;
 use app\models\ContactForm;
 use app\models\EntryForm;
 use app\models\Article;
+use app\models\Category;
 
 class SiteController extends Controller
 {
@@ -65,20 +66,20 @@ class SiteController extends Controller
     public function actionIndex()
     {
         // buid a DB query to get all articles
-        $query = Article::find();
+        $data = Article::getAll(2);
+        
+        $popular = Article::getPopular();
 
-        // get the total number of articles (but do not fetch the article data yet)
-        $count = $query->count();
+        $recent = Article::getRecent();
 
-        // create a pagination object with the total count
-        $pagination = new Pagination(['totalCount' => $count, 'pageSize' =>1]);
-
-        // limit the query using pagination and retrieve the articles
-        $articles = $query->offset($pagination->offset)->limit($pagination->limit)->all();        
+        $categories = Category::getAll();
 
         return $this->render('index', [
-            'articles' => $articles,
-            'pagination' => $pagination
+            'articles' => $data['articles'],
+            'pagination' => $data['pagination'],
+            'popular' => $popular,
+            'recent' => $recent,
+            'categories' => $categories
         ]);
     }
 
@@ -144,9 +145,22 @@ class SiteController extends Controller
         return $this->render('about');
     }
 
-    public function actionView()
+    public function actionView($id)
     {
-        return $this->render('single');
+        $article = Article::findOne($id);
+        
+        $popular = Article::getPopular();
+
+        $recent = Article::getRecent();
+
+        $categories = Category::getAll();
+
+        return $this->render('single', [
+            'article' => $article,
+            'popular' => $popular,
+            'recent' => $recent,
+            'categories' => $categories
+        ]);
     }
 
     public function actionCategory()

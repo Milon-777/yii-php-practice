@@ -2,8 +2,10 @@
 
 namespace app\models;
 
+use Symfony\Component\BrowserKit\Request;
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\data\Pagination;
 
 /**
  * This is the model class for table "article".
@@ -100,6 +102,56 @@ class Article extends \yii\db\ActiveRecord
         ArticleTag::deleteAll(['article_id' => $this->id]);
     }
 
+    public function deleteImage()
+    {
+        $imageUploadModel = new ImageUpload();
+        $imageUploadModel->deleteCurrentImage($this->image);
+    }
+
+    public function beforeDelete()
+    {
+        $this->deleteImage();
+
+        return parent::beforeDelete();
+    }
+
+    public static function getAll($pageSize = 4)
+    {
+        $query = Article::find();
+
+        $count = $query->count();
+
+        $pagination = new Pagination(['totalCount' => $count, 'pageSize' => $pageSize]);
+
+        $articles = $query->offset($pagination->offset)->limit($pagination->limit)->all();
+
+        $data['articles'] = $articles;
+        $data['pagination'] = $pagination;
+
+        return $data;
+    }
+
+    public static function getPopular()
+    {
+        return Article::find()->orderBy('viewed desc')->limit(3)->all();
+    }
+
+    public static function getRecent()
+    {
+        return Article::find()->orderBy('date asc')->limit(4)->all();
+    }
+
+    /**
+     * Gets query for [[Comments]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getComments()
+    {
+        return $this->hasMany(Comment::className(), ['article_id' => 'id']);
+    }
+
+    
     public function getImage()
     {
         if ($this->image) {
@@ -126,26 +178,8 @@ class Article extends \yii\db\ActiveRecord
         return ArrayHelper::getColumn($selectedIds, 'id');
     }
 
-    public function deleteImage()
+    public function getDate()
     {
-        $imageUploadModel = new ImageUpload();
-        $imageUploadModel->deleteCurrentImage($this->image);
-    }
-
-    public function beforeDelete()
-    {
-        $this->deleteImage();
-
-        return parent::beforeDelete();
-    }
-
-    /**
-     * Gets query for [[Comments]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getComments()
-    {
-        return $this->hasMany(Comment::className(), ['article_id' => 'id']);
+        return Yii::$app->formatter->asDate($this->date);
     }
 }
